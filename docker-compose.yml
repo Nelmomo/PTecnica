@@ -1,0 +1,53 @@
+services:
+  mysql-productos:
+    image: mysql:8.0
+    container_name: mysql-productos
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: productosdb
+    ports:
+      - "3306:3306"
+    volumes:
+      - productos_mysql_data:/var/lib/mysql
+
+  mysql-inventario:
+    image: mysql:8.0
+    container_name: mysql-inventario
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: inventariodb
+    ports:
+      - "3307:3306"
+    volumes:
+      - inventario_mysql_data:/var/lib/mysql
+
+  productos-service:
+    build:
+      context: ./productos_Ec
+    container_name: productos-service
+    depends_on:
+      - mysql-productos
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-productos:3306/productosdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: admin
+
+  inventario-service:
+    build:
+      context: ./inventario_Ec
+    container_name: inventario-service
+    depends_on:
+      - mysql-inventario
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-inventario:3306/inventariodb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: admin
+      API_KEY: Nmomo
+
+volumes:
+  productos_mysql_data:
+  inventario_mysql_data:
